@@ -1,0 +1,79 @@
+
+generator client {
+  provider = "prisma-client-js"
+}
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model sites {
+  site_id String @id
+  site_name String
+  site_type String @default("MACRO")
+  circle String
+  ba String
+  sdca_code String @default("SDCA01")
+  latitude Float?
+  longitude Float?
+  site_status String @default("ACTIVE")
+  vendor_name String?
+  hub_site_id String?
+  hub_level String? // HUB_L1, HUB_L2, HUB_L3, SPUR, STANDALONE
+  is_hub Boolean @default(false)
+  dependents_direct_count Int @default(0)
+  dependents_total_count Int @default(0)
+  is_deleted Boolean @default(false)
+  created_at DateTime @default(now())
+}
+
+model faults {
+  fault_id String @id @default(cuid())
+  site_id String
+  category String
+  severity String // P1,P2,P3,P4
+  alarm_time DateTime @default(now())
+  sla_due_at DateTime?
+  status String @default("OPEN")
+  reason_code String?
+  assigned_vendor String?
+  is_deleted Boolean @default(false)
+  created_at DateTime @default(now())
+}
+
+model site_dependencies {
+  id Int @id @default(autoincrement())
+  parent_site_id String
+  child_site_id String
+  dependency_type String @default("DIRECT_MW_HOP")
+  is_primary Boolean @default(true)
+}
+
+model rma_tickets {
+  rma_id String @id @default(cuid())
+  site_id String
+  serial_number String
+  vendor_name String
+  stage String @default("BOOKED")
+  pickup_date DateTime?
+  expected_return_date DateTime?
+  tat_days Int @default(21)
+}
+
+model escalation_matrix {
+  id Int @id @default(autoincrement())
+  circle String
+  fault_category String
+  severity String
+  level Int
+  designation String
+  timer_minutes Int
+}
+
+model audit_log {
+  id Int @id @default(autoincrement())
+  table_name String
+  record_id String
+  action String
+  changed_at DateTime @default(now())
+}
